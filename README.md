@@ -9,8 +9,8 @@ To learn basic navigation in git bash watch this:
 https://www.youtube.com/watch?v=oQc-2gsjgDg&ab_channel=MarioKaack  
 
 ## To copy code from github onto your computer  
-You should only have to do this once  
-Navigate to the folder where you want to put all of the code and copy from the website
+YOU SHOULD ONLY HAVE TO DO THIS ONCE  
+In git bash, navigate to the folder where you want to put all of the code and copy from the website
 
 git clone https://github.com/Gabriel-Tyler/Smokey-VII-Fan-Club.git
 
