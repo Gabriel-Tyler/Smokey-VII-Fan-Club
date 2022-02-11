@@ -26,6 +26,8 @@ git status
 git add .  
 git commit -m "your message here"  
 git push origin main  
+
+Please make sure your commit messages are short (less than 40 characters), and are descriptive  
   
 ## Resources for learning C++  
 https://www.learncpp.com/ (highly recommend, starts from scratch and teaches a lot)  
