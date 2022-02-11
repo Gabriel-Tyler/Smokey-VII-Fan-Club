@@ -26,3 +26,8 @@ git status
 git add .  
 git commit -m "your message here"  
 git push origin main  
+  
+## Resources for learning C++  
+https://www.learncpp.com/ (highly recommend)  
+http://www.cplusplus.com/reference/ (contains information on everything with a tutorials tab)  
+https://www.youtube.com/watch?v=vLnPwxZdW4Y&ab_channel=freeCodeCamp.org (if you have time you can watch this)  
