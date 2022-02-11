@@ -2,8 +2,11 @@
 Arduino Code for Project 1
 
 To push to github:  
-Edit main.cpp  
-Copy lines into terminal:  
+Update the code on your computer to be the most recent version:  
+
+git checkout main  
+  
+Copy lines into terminal after editing your code:  
 
 git status  
 git add .  
