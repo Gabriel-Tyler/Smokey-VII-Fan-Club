@@ -3,7 +3,9 @@ Arduino Code for Project 1
 
 ## To set up git on your computer download git 
 https://git-scm.com/  
-This should also come with a terminal called git bash which you will use
+This should also come with a terminal called git bash which you will use  
+To learn basic navigation in git bash watch this:  
+https://www.youtube.com/watch?v=oQc-2gsjgDg&ab_channel=MarioKaack  
 
 ## To copy code from github onto your computer  
 You should only have to do this once  
