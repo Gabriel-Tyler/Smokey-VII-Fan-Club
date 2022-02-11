@@ -28,6 +28,9 @@ git commit -m "your message here"
 git push origin main  
   
 ## Resources for learning C++  
-https://www.learncpp.com/ (highly recommend)  
+https://www.learncpp.com/ (highly recommend, starts from scratch and teaches a lot)  
 http://www.cplusplus.com/reference/ (contains information on everything with a tutorials tab)  
 https://www.youtube.com/watch?v=vLnPwxZdW4Y&ab_channel=freeCodeCamp.org (if you have time you can watch this)  
+
+## Arduino Language Reference  
+https://www.arduino.cc/reference/en/ (for information on built in functions, macros, and example code snippets)  
