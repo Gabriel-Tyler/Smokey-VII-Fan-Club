@@ -14,7 +14,7 @@ In git bash, navigate to the folder where you want to put all of the code and co
 `git clone https://github.com/Gabriel-Tyler/Smokey-VII-Fan-Club.git`
 
 ## To start editing files yourself  
-Start your own working branch with your name:
+Start your own working branch with your name:  
 `git checkout your-name-here`  
 Update the code on your computer to be the most recent version:  
 `git pull origin main`  
