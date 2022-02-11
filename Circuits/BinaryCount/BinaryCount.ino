@@ -1,0 +1,1 @@
+int start = 9;int wait = 50;void SetLeds(int x){for (int i = 0; i < 8; ++i){unsigned int mask = 1 << i;if (mask & x){analogWrite(start - i, 255);}else{analogWrite(start - i, 0);}}}void setup() {Serial.begin(9600);}void loop() {for (int i = 0; i < 256; ++i){SetLeds(i); delay(wait);}}
