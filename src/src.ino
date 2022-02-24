@@ -1,15 +1,15 @@
 class Component
 {
 private:
-    const int digitalPort;
+    int digitalPort;
 public:
-    Component(int dp);
+    void SetPort(int newPort);
     void Set(bool fadein=false,    float fadespeed=1.0f) const;
     void Clear(bool fadeout=false, float fadespeed=1.0f) const;
 };
-
-Component::Component(int dp) : digitalPort(dp)
+void Component::SetPort(int newport)
 {
+    digitalPort = newport;
 }
 void Component::Set(bool fadein, float fadespeed) const
 {
@@ -54,9 +54,14 @@ void setup()
 {
     Serial.begin(9600);
 
-    for (int ring = 0; i < NUM_RINGS; ++ring)
+    for (int ring = 0; ring < svii::NUM_RINGS; ++ring)
     {
-        svii::ringsArr[ring]
+        svii::ringsArr[ring].SetPort(svii::START_RING_PORT + ring);
+    }
+
+    for (int snowline = 0; snowline < svii::NUM_SNOW_LINES; ++snowline)
+    {
+        svii::snowLinesArr[snowline].SetPort(svii::START_SNOW_PORT+snowline);
     }
 }
 
