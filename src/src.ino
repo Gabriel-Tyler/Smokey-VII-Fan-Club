@@ -4,9 +4,6 @@
  * Smokey VII Fan Club
  */
 
-class PhotoResistor;
-class Animation;
-
 namespace svii // Smokey VII
 {
     constexpr int NUM_RINGS = 5;
