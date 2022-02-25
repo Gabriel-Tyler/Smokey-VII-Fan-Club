@@ -4,6 +4,13 @@
  * Smokey VII Fan Club
  */
 
+/*
+TODO:
+    add snow speed and ring speed 
+    add fade support for functions that use set and clear
+    test code with arduino
+ */
+
 namespace svii // Smokey VII
 {
     constexpr int NUM_RINGS = 5;
@@ -29,6 +36,7 @@ private:
 public:
     Component(unsigned char dpin=0);
     void SetPin(unsigned char dpin=0);
+    bool FadeCheck(int currBrightness, int initialBrightness);
     void Fade(int initBrightness, int fadeIncrement);
     void Set(bool fadein=false,    float fadespeed=1.0f) const;
     void Clear(bool fadeout=false, float fadespeed=1.0f) const;
@@ -122,7 +130,7 @@ void Component::SetPin(unsigned char dpin)
 {
     _digitalPin = dpin;
 }
-bool FadeCheck(int currBrightness, int initialBrightness)
+bool Component::FadeCheck(int currBrightness, int initialBrightness)
 {
     if (initialBrightness == 255)
     {
