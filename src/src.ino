@@ -29,6 +29,7 @@ private:
 public:
     Component(unsigned char dpin=0);
     void SetPin(unsigned char dpin=0);
+    void Fade(int initBrightness, int fadeIncrement);
     void Set(bool fadein=false,    float fadespeed=1.0f) const;
     void Clear(bool fadeout=false, float fadespeed=1.0f) const;
 };
@@ -121,13 +122,37 @@ void Component::SetPin(unsigned char dpin)
 {
     _digitalPin = dpin;
 }
+bool FadeCheck(int currBrightness, int initialBrightness)
+{
+    if (initialBrightness == 255)
+    {
+        return currBrightness > 0;
+    }
+    else if (initialBrightness == 0)
+    {
+        return currBrightness < 255;
+    }
+    else
+    {
+        return false;
+    }
+}
+void Component::Fade(int initialBrightness, int fadeIncrement)
+{
+    int currBrightness = initBrightness;
+    int brightnessIncrement = fadeIncrement;
+    while (FadeCheck(currBrightness, initialBrightness))
+    {
+        analogWrite(_digitalPin, currBrightness);
+        currBrightness += brightnessIncrement;
+        delay(static_cast<unsigned long>(1000ul/fadespeed));
+    }
+}
 void Component::Set(bool fadein, float fadespeed) const
 {
     if (fadein)
     {
-        // take initial time
-        // use analogWrite and a sin function of delta time
-        return;
+        Fade(0, 50);
     }
     // set the pin on high
     analogWrite(_digitalPin, 255);
@@ -136,9 +161,7 @@ void Component::Clear(bool fadeout, float fadespeed) const
 {
     if (fadeout)
     {
-        // take initial time
-        // use analogWrite and a sin function of delta time
-        return;
+        Fade(255, -50);
     }
     // set the pin on low
     analogWrite(_digitalPin, 0);
