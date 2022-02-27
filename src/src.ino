@@ -36,8 +36,8 @@ private:
 public:
     Component(unsigned char dpin=0);
     void SetPin(unsigned char dpin=0);
-    bool FadeCheck(int currBrightness, int initialBrightness);
-    void Fade(int initBrightness, int fadeIncrement);
+    bool FadeCheck(int currBrightness, int initialBrightness) const;
+    void Fade(int initBrightness, int fadeIncrement, float fadespeed) const;
     void Set(bool fadein=false,    float fadespeed=1.0f) const;
     void Clear(bool fadeout=false, float fadespeed=1.0f) const;
 };
@@ -72,8 +72,8 @@ class Animation
 private:
     enum State
     {
-        INIT=0,   // only snow
-        ACTIVATED // snow and rings
+        INIT=0,
+        ACTIVATED
     };
     State _currentState = INIT;
     Component _ringsArr[svii::NUM_RINGS];
@@ -130,7 +130,7 @@ void Component::SetPin(unsigned char dpin)
 {
     _digitalPin = dpin;
 }
-bool Component::FadeCheck(int currBrightness, int initialBrightness)
+bool Component::FadeCheck(int currBrightness, int initialBrightness) const
 {
     if (initialBrightness == 255)
     {
@@ -145,9 +145,9 @@ bool Component::FadeCheck(int currBrightness, int initialBrightness)
         return false;
     }
 }
-void Component::Fade(int initialBrightness, int fadeIncrement)
+void Component::Fade(int initialBrightness, int fadeIncrement, float fadespeed) const 
 {
-    int currBrightness = initBrightness;
+    int currBrightness = initialBrightness;
     int brightnessIncrement = fadeIncrement;
     while (FadeCheck(currBrightness, initialBrightness))
     {
@@ -160,7 +160,7 @@ void Component::Set(bool fadein, float fadespeed) const
 {
     if (fadein)
     {
-        Fade(0, 50);
+        Fade(0, 50, fadespeed);
     }
     // set the pin on high
     analogWrite(_digitalPin, 255);
@@ -169,7 +169,7 @@ void Component::Clear(bool fadeout, float fadespeed) const
 {
     if (fadeout)
     {
-        Fade(255, -50);
+        Fade(255, -50, fadespeed);
     }
     // set the pin on low
     analogWrite(_digitalPin, 0);
