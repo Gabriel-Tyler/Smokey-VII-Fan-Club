@@ -36,10 +36,8 @@ private:
 public:
     Component(unsigned char dpin=0);
     void SetPin(unsigned char dpin=0);
-    bool FadeCheck(int currBrightness, int initialBrightness) const;
-    void Fade(int initBrightness, int fadeIncrement, float fadespeed) const;
-    void Set(bool fadein=false,    float fadespeed=1.0f) const;
-    void Clear(bool fadeout=false, float fadespeed=1.0f) const;
+    void Set() const;
+    void Clear() const;
 };
 
 class PhotoResistor
@@ -55,11 +53,13 @@ private:
 public:
     PhotoResistor(unsigned char apin, long min=0, long max=255);
 
-    long GetRawData() const;
-    int  GetData() const;
     void SetPin(unsigned char apin);
     void SetMin(long min=0);
     void SetMax(long max=255);
+
+    long GetRawData() const;
+    int  GetData() const;
+
     void SetSensitivity(int s=0);
 
     void Init();
@@ -81,7 +81,7 @@ private:
 
 public:
     void InitPins();
-    bool IsInit() const;
+    bool IsInitState() const;
 
     void ToggleState();
     void LightRings();
@@ -130,47 +130,13 @@ void Component::SetPin(unsigned char dpin)
 {
     _digitalPin = dpin;
 }
-bool Component::FadeCheck(int currBrightness, int initialBrightness) const
+void Component::Set() const
 {
-    if (initialBrightness == 255)
-    {
-        return currBrightness > 0;
-    }
-    else if (initialBrightness == 0)
-    {
-        return currBrightness < 255;
-    }
-    else
-    {
-        return false;
-    }
-}
-void Component::Fade(int initialBrightness, int fadeIncrement, float fadespeed) const 
-{
-    int currBrightness = initialBrightness;
-    int brightnessIncrement = fadeIncrement;
-    while (FadeCheck(currBrightness, initialBrightness))
-    {
-        analogWrite(_digitalPin, currBrightness);
-        currBrightness += brightnessIncrement;
-        delay(static_cast<unsigned long>(1000ul/fadespeed));
-    }
-}
-void Component::Set(bool fadein, float fadespeed) const
-{
-    if (fadein)
-    {
-        Fade(0, 50, fadespeed);
-    }
     // set the pin on high
     analogWrite(_digitalPin, 255);
 }
-void Component::Clear(bool fadeout, float fadespeed) const
+void Component::Clear() const
 {
-    if (fadeout)
-    {
-        Fade(255, -50, fadespeed);
-    }
     // set the pin on low
     analogWrite(_digitalPin, 0);
 }
@@ -245,7 +211,7 @@ void Animation::InitPins()
         pinMode(pin, OUTPUT);
     }
 }
-bool Animation::IsInit() const
+bool Animation::IsInitState() const
 {
     // return true if current state is the initial state
     return _currentState == INIT;
@@ -299,7 +265,7 @@ void Animation::Activate()
     // if the current state is the initial state, toggle the state to activated
     // and activate the snow and olympic ring animations with delays in between each
     // if the current state is the activated state, clear the olympic rings and toggle state
-    if (svii::lights.IsInit())
+    if (svii::lights.IsInitState())
     {
         ToggleState();
 
