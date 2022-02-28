@@ -80,8 +80,8 @@ public:
     bool IsInitState() const;
 
     void ToggleState();
-    void LightRings();
-    void LightSnow();
+    void LightAllRings();
+    void IncrementSnow();
     void LightAllSnow();
     void ClearRings();
     bool HasLightChanged(const PhotoResistor& sensor) const;
@@ -105,7 +105,7 @@ void loop()
 {
     svii::sensor.SetLightVal(); // get the current light value of the room
 
-    svii::lights.LightSnow();   // light the next line of snow and clear the previous
+    svii::lights.IncrementSnow();   // light the next line of snow and clear the previous
 
     // check if the light value of the room has increased or decreased
     // by a specified sensitivity
@@ -205,7 +205,7 @@ void Animation::ToggleState()
     if (_currentState == INITIAL) _currentState = ACTIVATED;
     else _currentState = INITIAL;
 }
-void Animation::LightRings()
+void Animation::LightAllRings()
 {
     // light all the rings one by one with a delay in between
     for (int ring = 0; ring < svii::NUM_RINGS; ++ring)
@@ -214,7 +214,7 @@ void Animation::LightRings()
         // animation delay, divide by ring speed 
     }
 }
-void Animation::LightSnow()
+void Animation::IncrementSnow()
 {
     // todo: add a check for snow speed 
     // snow lines start from bottom to top
@@ -261,7 +261,7 @@ void Animation::Activate()
 
         LightAllSnow();
         delay(1000);
-        LightRings();
+        LightAllRings();
         delay(1000);
     }
     else
