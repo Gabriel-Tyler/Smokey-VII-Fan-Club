@@ -54,17 +54,13 @@ public:
     PhotoResistor(unsigned char apin, long min=0, long max=255);
 
     void SetPin(unsigned char apin);
-    void SetMin(long min=0);
-    void SetMax(long max=255);
 
     long GetRawData() const;
     int  GetData() const;
 
-    void SetSensitivity(int s=0);
-
     void Init();
     void SetLightVal();
-    bool HasLightChanged() const;
+    bool IsBeyondSensitivity() const;
 };
 
 class Animation
@@ -72,10 +68,10 @@ class Animation
 private:
     enum State
     {
-        INIT=0,
+        INITIAL=0,
         ACTIVATED
     };
-    State _currentState = INIT;
+    State _currentState = INITIAL;
     Component _ringsArr[svii::NUM_RINGS];
     Component _snowLinesArr[svii::NUM_SNOW_LINES];
 
@@ -88,6 +84,7 @@ public:
     void LightSnow();
     void LightAllSnow();
     void ClearRings();
+    bool HasLightChanged(const PhotoResistor& sensor) const;
     void Activate();
 };
 
@@ -112,7 +109,7 @@ void loop()
 
     // check if the light value of the room has increased or decreased
     // by a specified sensitivity
-    if (svii::sensor.HasLightChanged()) 
+    if (svii::lights.HasLightChanged(svii::sensor)) 
     {
         // start the olympic ring animation or clear the olympic rings
         // if the light value returned to initial range
@@ -162,18 +159,6 @@ void PhotoResistor::SetPin(unsigned char apin)
 {
     _analogPin = apin;
 }
-void PhotoResistor::SetMin(long min)
-{
-    _min = min;
-}
-void PhotoResistor::SetMax(long max)
-{
-    _max = max;
-}
-void PhotoResistor::SetSensitivity(int s)
-{
-    _sensitivity = s;
-}
 void PhotoResistor::Init()
 {
     _initialLightVal = GetData(); // set the initial light val 
@@ -182,10 +167,8 @@ void PhotoResistor::SetLightVal()
 {
     _currLightVal = GetData();    // get the current normalized data
 }
-bool PhotoResistor::HasLightChanged() const
+bool PhotoResistor::IsBeyondSensitivity() const
 {
-    // return true if the current light value is above or below
-    // the initial light value by a specified sensitivity
     return (_currLightVal - _sensitivity > _initialLightVal) ||
            (_currLightVal + _sensitivity < _initialLightVal);
 }
@@ -214,13 +197,13 @@ void Animation::InitPins()
 bool Animation::IsInitState() const
 {
     // return true if current state is the initial state
-    return _currentState == INIT;
+    return _currentState == INITIAL;
 }
 void Animation::ToggleState()
 {
     // toggle the current state between initial state and activated state
-    if (_currentState == INIT) _currentState = ACTIVATED;
-    else _currentState = INIT;
+    if (_currentState == INITIAL) _currentState = ACTIVATED;
+    else _currentState = INITIAL;
 }
 void Animation::LightRings()
 {
@@ -259,6 +242,13 @@ void Animation::ClearRings()
         _ringsArr[ring].Clear();
         // animation delay
     }
+}
+bool Animation::HasLightChanged(const PhotoResistor& sensor) const
+{
+    // return true if the current light value is above or below
+    // the initial light value by a specified sensitivity
+    return ( sensor.IsBeyondSensitivity() &&  IsInitState()) || 
+           (!sensor.IsBeyondSensitivity() && !IsInitState());
 }
 void Animation::Activate()
 {
