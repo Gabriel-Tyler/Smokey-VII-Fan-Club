@@ -13,14 +13,14 @@ TODO:
 
 namespace svii // Smokey VII
 {
-    constexpr int NUM_RINGS = 5;
+    constexpr int NUM_RINGS = 0;
     constexpr int NUM_SNOW_LINES = 5;
 
     constexpr int START_RING_PIN = 2;
     constexpr int START_SNOW_PIN = START_RING_PIN + NUM_RINGS;
 
     constexpr int SENSOR_APIN = 0;
-    constexpr int SENSOR_SENSITIVITY = 50;
+    constexpr int SENSOR_SENSITIVITY = 20;
 
     constexpr float SNOW_SPEED = 1.0f;
     constexpr float RING_SPEED = 1.0f;
@@ -104,13 +104,16 @@ void setup()
 void loop()
 {
     svii::sensor.SetLightVal(); // get the current light value of the room
-
+    Serial.println("loop");
+    
     svii::lights.IncrementSnow();   // light the next line of snow and clear the previous
-
+    delay(300);
+    
     // check if the light value of the room has increased or decreased
     // by a specified sensitivity
     if (svii::lights.HasLightChanged(svii::sensor)) 
     {
+        Serial.println("light changed");
         // start the olympic ring animation or clear the olympic rings
         // if the light value returned to initial range
         svii::lights.Activate(); 
@@ -212,10 +215,12 @@ void Animation::LightAllRings()
     {
         _ringsArr[ring].Set();
         // animation delay, divide by ring speed 
+        delay(100);
     }
 }
 void Animation::IncrementSnow()
 {
+    if (svii::NUM_SNOW_LINES < 1) return;
     // todo: add a check for snow speed 
     // snow lines start from bottom to top
     // clear the currently lit line of snow and light the next line of snow
@@ -232,6 +237,7 @@ void Animation::LightAllSnow()
     {
         _snowLinesArr[snow].Set();
         // animation delay
+        delay(100);
     }
 }
 void Animation::ClearRings()
@@ -241,6 +247,7 @@ void Animation::ClearRings()
     {
         _ringsArr[ring].Clear();
         // animation delay
+        delay(100);
     }
 }
 bool Animation::HasLightChanged(const PhotoResistor& sensor) const
@@ -260,9 +267,9 @@ void Animation::Activate()
         ToggleState();
 
         LightAllSnow();
-        delay(1000);
+        delay(500);
         LightAllRings();
-        delay(1000);
+        delay(500);
     }
     else
     {
