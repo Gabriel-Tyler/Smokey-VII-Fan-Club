@@ -6,84 +6,14 @@
 
 /*
 TODO:
-    add snow speed and ring speed 
-    add fade support for functions that use set and clear
-    test code with arduino
- */
+    Add a fade to the leds
+    Add a random function to the snow
+    Make magic numbers into constants
+*/
 
-namespace svii // Smokey VII
-{
-    constexpr int NUM_RINGS = 0;
-    constexpr int NUM_SNOW_LINES = 2;
-
-    constexpr int START_RING_PIN = 2;
-    constexpr int START_SNOW_PIN = START_RING_PIN + NUM_RINGS;
-
-    constexpr int SENSOR_APIN = 0;
-    constexpr int SENSOR_SENSITIVITY = 30;
-
-    constexpr int LOOP_DELAY = 20;
-}
-
-class Component
-{
-private:
-    unsigned char _digitalPin;
-
-public:
-    Component(unsigned char dpin=0);
-    void SetPin(unsigned char dpin=0);
-    void Set() const;
-    void Clear() const;
-};
-
-class PhotoResistor
-{
-private:
-    unsigned char _analogPin;
-    long _min;
-    long _max;
-    int  _sensitivity;
-    int  _initialLightVal;
-    int  _currLightVal;
-
-public:
-    PhotoResistor(unsigned char apin, long min=0, long max=255);
-
-    void SetPin(unsigned char apin);
-
-    long GetRawData() const;
-    int  GetData() const;
-
-    void Init();
-    void SetLightVal();
-    bool IsBeyondSensitivity() const;
-};
-
-class Animation
-{
-private:
-    enum State
-    {
-        INITIAL=0,
-        ACTIVATED
-    };
-    State _currentState = INITIAL;
-    Component _ringsArr[svii::NUM_RINGS];
-    Component _snowLinesArr[svii::NUM_SNOW_LINES];
-
-public:
-    void InitPins();
-    bool IsInitState() const;
-
-    void ToggleState();
-    void LightAllRings();
-    void IncrementSnow();
-    void LightAllSnow();
-    void ClearRings();
-    bool HasLightChanged(const PhotoResistor& sensor) const;
-    void Activate();
-};
+#include "Component.h"
+#include "PhotoResistor.h"
+#include "Animation.h"
 
 namespace svii
 {
@@ -213,7 +143,6 @@ void Animation::LightAllRings()
     // light all the rings one by one with a delay in between
     for (int ring = 0; ring < svii::NUM_RINGS; ++ring)
     {
-        Serial.print("lighting pin: ");
         _ringsArr[ring].Set();
         // animation delay, divide by ring speed 
         delay(1000);
@@ -226,16 +155,13 @@ void Animation::IncrementSnow()
     // snow lines start from bottom to top
     // clear the currently lit line of snow and light the next line of snow
     static int currSnowLine = 0;
-    Serial.print("Clearing snow pin: ");
     _snowLinesArr[currSnowLine].Clear();
     --currSnowLine;
     if (currSnowLine < 0) currSnowLine = svii::NUM_SNOW_LINES-1;
-    Serial.print("Setting snow pin: ");
     _snowLinesArr[currSnowLine].Set();
 }
 void Animation::LightAllSnow()
 {
-    Serial.println("lighting all snow");
     // light all the lines of snow one by one with a delay in between
     for (int snow = 0; snow < svii::NUM_SNOW_LINES; ++snow)
     {
@@ -246,11 +172,9 @@ void Animation::LightAllSnow()
 }
 void Animation::ClearRings()
 {
-    Serial.println("clearing rings");
     // clear the rings one by one with a delay in between each
     for (int ring = 0; ring < svii::NUM_RINGS; ++ring)
     {
-        Serial.print("clearing pin");
         _ringsArr[ring].Clear();
         // animation delay
         delay(1000);
