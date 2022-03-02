@@ -14,18 +14,15 @@ TODO:
 namespace svii // Smokey VII
 {
     constexpr int NUM_RINGS = 0;
-    constexpr int NUM_SNOW_LINES = 5;
+    constexpr int NUM_SNOW_LINES = 2;
 
     constexpr int START_RING_PIN = 2;
     constexpr int START_SNOW_PIN = START_RING_PIN + NUM_RINGS;
 
     constexpr int SENSOR_APIN = 0;
-    constexpr int SENSOR_SENSITIVITY = 20;
+    constexpr int SENSOR_SENSITIVITY = 30;
 
-    constexpr float SNOW_SPEED = 1.0f;
-    constexpr float RING_SPEED = 1.0f;
-
-    constexpr int DELAY = 20;
+    constexpr int LOOP_DELAY = 20;
 }
 
 class Component
@@ -97,6 +94,7 @@ namespace svii
 void setup()
 {
     Serial.begin(9600);       // initialize Serial terminal
+    Serial.println("\nStarting:");
     svii::lights.InitPins();  // fill snow and rings arrays with digital output pins
     svii::sensor.Init();      // get the initial light value of the room
 }
@@ -119,7 +117,7 @@ void loop()
         svii::lights.Activate(); 
     }
     
-    delay(svii::DELAY);  // delay loop for stability
+    delay(svii::LOOP_DELAY);  // delay loop for stability
 }
 
 Component::Component(unsigned char dpin)
@@ -132,11 +130,13 @@ void Component::SetPin(unsigned char dpin)
 }
 void Component::Set() const
 {
+    Serial.println(_digitalPin);
     // set the pin on high
     analogWrite(_digitalPin, 255);
 }
 void Component::Clear() const
 {
+    Serial.println(_digitalPin);
     // set the pin on low
     analogWrite(_digitalPin, 0);
 }
@@ -213,9 +213,10 @@ void Animation::LightAllRings()
     // light all the rings one by one with a delay in between
     for (int ring = 0; ring < svii::NUM_RINGS; ++ring)
     {
+        Serial.print("lighting pin: ");
         _ringsArr[ring].Set();
         // animation delay, divide by ring speed 
-        delay(100);
+        delay(1000);
     }
 }
 void Animation::IncrementSnow()
@@ -225,13 +226,16 @@ void Animation::IncrementSnow()
     // snow lines start from bottom to top
     // clear the currently lit line of snow and light the next line of snow
     static int currSnowLine = 0;
+    Serial.print("Clearing snow pin: ");
     _snowLinesArr[currSnowLine].Clear();
     --currSnowLine;
     if (currSnowLine < 0) currSnowLine = svii::NUM_SNOW_LINES-1;
+    Serial.print("Setting snow pin: ");
     _snowLinesArr[currSnowLine].Set();
 }
 void Animation::LightAllSnow()
 {
+    Serial.println("lighting all snow");
     // light all the lines of snow one by one with a delay in between
     for (int snow = 0; snow < svii::NUM_SNOW_LINES; ++snow)
     {
@@ -242,12 +246,14 @@ void Animation::LightAllSnow()
 }
 void Animation::ClearRings()
 {
+    Serial.println("clearing rings");
     // clear the rings one by one with a delay in between each
     for (int ring = 0; ring < svii::NUM_RINGS; ++ring)
     {
+        Serial.print("clearing pin");
         _ringsArr[ring].Clear();
         // animation delay
-        delay(100);
+        delay(1000);
     }
 }
 bool Animation::HasLightChanged(const PhotoResistor& sensor) const
