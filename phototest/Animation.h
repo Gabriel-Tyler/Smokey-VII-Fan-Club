@@ -15,24 +15,18 @@ private:
     };
     State _currentState = INITIAL;
     Component _ringsArr[svii::NUM_RINGS];
-    Component _snowArr[svii::NUM_SNOW];
+    Component _snowLinesArr[svii::NUM_SNOW_LINES];
 
 public:
     void InitPins();
-    
     bool IsInitState() const;
+
     void ToggleState();
-
-    bool HasLightChanged(const PhotoResistor& sensor) const;
-
-    void IncrementSnow();
-
     void LightAllRings();
+    void IncrementSnow();
     void LightAllSnow();
-
     void ClearRings();
-    void ClearSnow();
-
+    bool HasLightChanged(const PhotoResistor& sensor) const;
     void Activate();
 };
 

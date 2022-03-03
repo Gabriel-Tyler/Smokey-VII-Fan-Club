@@ -1,25 +1,20 @@
 /* Gabriel Tyler
  * EF 158 Project 1
- * Recitation 3-1?
+ * Recitation 3-1
  * Smokey VII Fan Club
  */
-
-/*
-TODO:
-    Add a fade to the leds
-    Add a random function to the snow
-    Make magic numbers into constants
-*/
 
 #include "Component.h"
 #include "PhotoResistor.h"
 #include "Animation.h"
 
-namespace svii
+namespace svii // Smokey VII Fan Club
 {
     PhotoResistor sensor(SENSOR_APIN);
     Animation lights;
 }
+
+// -------- MAIN SETUP AND LOOP --------
 
 void setup()
 {
@@ -35,7 +30,7 @@ void loop()
     Serial.println("loop");
     
     svii::lights.IncrementSnow();   // light the next line of snow and clear the previous
-    delay(300);
+    delay(svii::SNOW_DELAY);
     
     // check if the light value of the room has increased or decreased
     // by a specified sensitivity
@@ -50,26 +45,34 @@ void loop()
     delay(svii::LOOP_DELAY);  // delay loop for stability
 }
 
+// -------- COMPONENT DEFINITIONS --------
+
 Component::Component(unsigned char dpin)
     : _digitalPin(dpin)
 {
 }
+
 void Component::SetPin(unsigned char dpin)
 {
     _digitalPin = dpin;
 }
+unsigned char Component::GetPin() const
+{
+    return _digitalPin;
+}
+
 void Component::Set() const
 {
-    Serial.println(_digitalPin);
     // set the pin on high
     analogWrite(_digitalPin, 255);
 }
 void Component::Clear() const
 {
-    Serial.println(_digitalPin);
     // set the pin on low
     analogWrite(_digitalPin, 0);
 }
+
+// -------- PHOTORESISTOR DEFINITIONS --------
 
 PhotoResistor::PhotoResistor(unsigned char apin, long min, long max) 
     : _analogPin(apin), _min(min), _max(max), 
@@ -77,6 +80,12 @@ PhotoResistor::PhotoResistor(unsigned char apin, long min, long max)
       _initialLightVal(0), _currLightVal(0)
 {
 }
+
+void PhotoResistor::SetPin(unsigned char apin)
+{
+    _analogPin = apin;
+}
+
 long PhotoResistor::GetRawData() const
 {
     // returns a number 0 to 1023
@@ -88,10 +97,7 @@ int  PhotoResistor::GetData() const
     // normalizes the number from [0, 1023] to [_min, _max]/[0, 255]
     return static_cast<int>(constrain(map(GetRawData(), 0l, 1023l, _min, _max), 0l, 1023l));
 }
-void PhotoResistor::SetPin(unsigned char apin)
-{
-    _analogPin = apin;
-}
+
 void PhotoResistor::Init()
 {
     _initialLightVal = GetData(); // set the initial light val 
@@ -102,16 +108,19 @@ void PhotoResistor::SetLightVal()
 }
 bool PhotoResistor::IsBeyondSensitivity() const
 {
+    // Check if the current light value is above or below 
+    // the initial light value by a sensitivity
     return (_currLightVal - _sensitivity > _initialLightVal) ||
            (_currLightVal + _sensitivity < _initialLightVal);
 }
 
+// -------- ANIMATION DEFINITIONS --------
+
 void Animation::InitPins()
 {
-    // maybe output to Serial the pins for the rings and snow on startup
-
     // fill the ring and snow components with corresponding pins
     // and set the pins as output
+
     unsigned char pin;
     for (int ring = 0; ring < svii::NUM_RINGS; ++ring)
     {
@@ -120,13 +129,14 @@ void Animation::InitPins()
         pinMode(pin, OUTPUT);
     }
 
-    for (int snowline = 0; snowline < svii::NUM_SNOW_LINES; ++snowline)
+    for (int snow = 0; snow < svii::NUM_SNOW; ++snow)
     {
-        pin = svii::START_SNOW_PIN + snowline;
-        _snowLinesArr[snowline].SetPin(pin);
+        pin = svii::START_SNOW_PIN + snow;
+        _snowArr[snow].SetPin(pin);
         pinMode(pin, OUTPUT);
     }
 }
+
 bool Animation::IsInitState() const
 {
     // return true if current state is the initial state
@@ -138,55 +148,95 @@ void Animation::ToggleState()
     if (_currentState == INITIAL) _currentState = ACTIVATED;
     else _currentState = INITIAL;
 }
-void Animation::LightAllRings()
-{
-    // light all the rings one by one with a delay in between
-    for (int ring = 0; ring < svii::NUM_RINGS; ++ring)
-    {
-        _ringsArr[ring].Set();
-        // animation delay, divide by ring speed 
-        delay(1000);
-    }
-}
-void Animation::IncrementSnow()
-{
-    if (svii::NUM_SNOW_LINES < 1) return;
-    // todo: add a check for snow speed 
-    // snow lines start from bottom to top
-    // clear the currently lit line of snow and light the next line of snow
-    static int currSnowLine = 0;
-    _snowLinesArr[currSnowLine].Clear();
-    --currSnowLine;
-    if (currSnowLine < 0) currSnowLine = svii::NUM_SNOW_LINES-1;
-    _snowLinesArr[currSnowLine].Set();
-}
-void Animation::LightAllSnow()
-{
-    // light all the lines of snow one by one with a delay in between
-    for (int snow = 0; snow < svii::NUM_SNOW_LINES; ++snow)
-    {
-        _snowLinesArr[snow].Set();
-        // animation delay
-        delay(100);
-    }
-}
-void Animation::ClearRings()
-{
-    // clear the rings one by one with a delay in between each
-    for (int ring = 0; ring < svii::NUM_RINGS; ++ring)
-    {
-        _ringsArr[ring].Clear();
-        // animation delay
-        delay(1000);
-    }
-}
+
 bool Animation::HasLightChanged(const PhotoResistor& sensor) const
 {
     // return true if the current light value is above or below
     // the initial light value by a specified sensitivity
+    // and if the state needs to change
     return ( sensor.IsBeyondSensitivity() &&  IsInitState()) || 
            (!sensor.IsBeyondSensitivity() && !IsInitState());
 }
+
+void Animation::IncrementSnow()
+{
+    static int currSnow = svii::NUM_SNOW-1; // current snow LED
+
+    // if there are no snow LEDS, do nothing
+    if (svii::NUM_SNOW < 1) return;
+
+    // clear the currently lit line of snow and light the next line of snow
+    _snowArr[currSnow].Clear();
+
+    ++currSnow;
+    if (currSnow >= svii::NUM_SNOW) 
+        currSnow = 0;
+
+    _snowArr[currSnow].Set();
+}
+
+void Animation::LightAllRings()
+{
+    Serial.println("Setting all rings");
+    // light all the rings one by one with a delay in between
+    for (int ring = 0; ring < svii::NUM_RINGS; ++ring)
+    {
+        Serial.print("Setting Pin: ");
+        Serial.println(_ringsArr[ring].GetPin());
+
+        _ringsArr[ring].Set();
+
+        // animation delay, divide by ring speed 
+        delay(svii::ANIMATION_DELAY);
+    }
+}
+void Animation::LightAllSnow()
+{
+    Serial.println("Setting all snow");
+    // light all the rings one by one with a delay in between
+    for (int snow = 0; snow < svii::NUM_SNOW; ++snow)
+    {
+        Serial.print("Setting Pin: ");
+        Serial.println(_snowArr[snow].GetPin());
+
+        _snowArr[snow].Set();
+
+        // animation delay, divide by ring speed 
+        delay(svii::ANIMATION_DELAY);
+    }
+}
+
+void Animation::ClearRings()
+{
+    Serial.println("Clearing all rings");
+    // clear the rings one by one with a delay in between each
+    for (int ring = 0; ring < svii::NUM_RINGS; ++ring)
+    {
+        Serial.print("Clearing pin: ");
+        Serial.println(_ringsArr[ring].GetPin());
+
+        _ringsArr[ring].Clear();
+
+        // animation delay
+        delay(svii::ANIMATION_DELAY);
+    }
+}
+void Animation::ClearSnow()
+{
+    Serial.println("Clearing all snow");
+    // clear the rings one by one with a delay in between each
+    for (int snow = 0; snow < svii::NUM_SNOW; ++snow)
+    {
+        Serial.print("Clearing pin: ");
+        Serial.println(_snowArr[snow].GetPin());
+
+        _snowArr[snow].Clear();
+
+        // animation delay
+        delay(svii::ANIMATION_DELAY);
+    }
+}
+
 void Animation::Activate()
 {
     // if the current state is the initial state, toggle the state to activated
@@ -195,14 +245,13 @@ void Animation::Activate()
     if (svii::lights.IsInitState())
     {
         ToggleState();
-
         LightAllSnow();
-        delay(500);
         LightAllRings();
-        delay(500);
+        delay(svii::SNOW_DELAY);
     }
     else
     {
+        ClearSnow();
         ClearRings();
         ToggleState();
     }

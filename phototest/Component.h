@@ -8,10 +8,8 @@ private:
 
 public:
     Component(unsigned char dpin=0);
-
     void SetPin(unsigned char dpin=0);
     unsigned char GetPin() const;
-
     void Set() const;
     void Clear() const;
 };
